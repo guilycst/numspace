@@ -615,6 +615,97 @@ func TestFlatMatrix_Mul(t *testing.T) {
 	}
 }
 
+func TestFlatMatrix_Transpose(t *testing.T) {
+	type fields struct {
+		data []float64
+		rows int
+		cols int
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   Matrix
+	}{
+		{
+			name: "Test transpose of 2x2 matrix",
+			fields: fields{
+				data: []float64{1, 2, 3, 4},
+				rows: 2,
+				cols: 2,
+			},
+			want: &FlatMatrix{
+				data: []float64{1, 3, 2, 4},
+				rows: 2,
+				cols: 2,
+			},
+		},
+		{
+			name: "Test transpose of 3x3 matrix",
+			fields: fields{
+				data: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+				rows: 3,
+				cols: 3,
+			},
+			want: &FlatMatrix{
+				data: []float64{1, 4, 7, 2, 5, 8, 3, 6, 9},
+				rows: 3,
+				cols: 3,
+			},
+		},
+		{
+			name: "Test transpose of 2x3 matrix",
+			fields: fields{
+				data: []float64{1, 2, 3, 4, 5, 6},
+				rows: 2,
+				cols: 3,
+			},
+			want: &FlatMatrix{
+				data: []float64{1, 4, 2, 5, 3, 6},
+				rows: 3,
+				cols: 2,
+			},
+		},
+		{
+			name: "Test transpose of 3x2 matrix",
+			fields: fields{
+				data: []float64{1, 2, 3, 4, 5, 6},
+				rows: 3,
+				cols: 2,
+			},
+			want: &FlatMatrix{
+				data: []float64{1, 3, 5, 2, 4, 6},
+				rows: 2,
+				cols: 3,
+			},
+		},
+		{
+			name: "Test transpose of empty matrix",
+			fields: fields{
+				data: []float64{},
+				rows: 0,
+				cols: 0,
+			},
+			want: &FlatMatrix{
+				data: []float64{},
+				rows: 0,
+				cols: 0,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &FlatMatrix{
+				data: tt.fields.data,
+				rows: tt.fields.rows,
+				cols: tt.fields.cols,
+			}
+			if got := m.Transpose(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FlatMatrix.Transpose() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestFlatMatrix_CompareDimensions(t *testing.T) {
 	type fields struct {
 		data []float64

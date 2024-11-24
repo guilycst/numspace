@@ -53,6 +53,13 @@ type Matrix interface {
 
 	// CompareDimensions checks if the dimensions of the current matrix match another matrix.
 	CompareDimensions(Matrix) bool
+
+	// Mul performs matrix multiplication with another matrix.
+	// Returns an error if dimensions are incompatible.
+	Mul(Matrix) (Matrix, error)
+
+	// Transpose returns a new matrix that is the transpose of the current matrix.
+	Transpose() Matrix
 }
 
 // FlatMatrix is a concrete implementation of the Matrix interface.
@@ -180,6 +187,20 @@ func (m *FlatMatrix) MustAt(i, j int) (v float64) {
 		panic(err)
 	}
 	return
+}
+
+func (m *FlatMatrix) Transpose() Matrix {
+	result, err := NewMatrixZero(m.Cols(), m.Rows())
+	if err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < m.Rows(); i++ {
+		for j := 0; j < m.Cols(); j++ {
+			result.(*FlatMatrix).data[j*m.Rows()+i] = m.data[i*m.Cols()+j]
+		}
+	}
+	return result
 }
 
 func NewMatrix(data [][]float64) (Matrix, error) {
