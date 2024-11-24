@@ -8,6 +8,7 @@ var ErrNotRectangular = errors.New("matrix is not rectangular")
 var ErrNilMatrix = errors.New("matrix is nil")
 var ErrInvalidDimensions = errors.New("invalid dimensions")
 var ErrorIndexOutOfBounds = errors.New("index out of range")
+var ErrMulDimensions = errors.New("invalid dimensions for multiplication")
 
 type Matrix interface {
 	Rows() int
@@ -98,6 +99,33 @@ func (m *FlatMatrix) ScalarMul(scalar float64) (Matrix, error) {
 	return NewMatrixFlat(result, m.rows, m.cols)
 }
 
+func (m *FlatMatrix) Mul(other Matrix) (Matrix, error) {
+	if other == nil {
+		return nil, ErrNilMatrix
+	}
+
+	if m.Cols() != other.Rows() {
+		return nil, ErrMulDimensions
+	}
+
+	result, err := NewMatrixZero(m.Rows(), other.Cols())
+	if err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < m.Rows(); i++ {
+		for j := 0; j < other.Cols(); j++ {
+			var sum float64
+			for k := 0; k < m.Cols(); k++ {
+				sum += m.MustAt(i, k) * other.MustAt(k, j)
+			}
+			result.data[i*result.cols+j] = sum
+		}
+	}
+
+	return result, nil
+}
+
 func (m *FlatMatrix) CompareDimensions(other Matrix) bool {
 	if other == nil {
 		return false
@@ -132,6 +160,14 @@ func NewMatrixFlat(data []float64, rows, cols int) (*FlatMatrix, error) {
 	}
 	return &FlatMatrix{
 		data: data,
+		rows: rows,
+		cols: cols,
+	}, nil
+}
+
+func NewMatrixZero(rows, cols int) (*FlatMatrix, error) {
+	return &FlatMatrix{
+		data: make([]float64, rows*cols),
 		rows: rows,
 		cols: cols,
 	}, nil

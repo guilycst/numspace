@@ -486,6 +486,135 @@ func TestFlatMatrix_ScalarMul(t *testing.T) {
 	}
 }
 
+func TestFlatMatrix_Mul(t *testing.T) {
+	type fields struct {
+		data []float64
+		rows int
+		cols int
+	}
+	type args struct {
+		other Matrix
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    Matrix
+		wantErr bool
+	}{
+		{
+			name: "Test multiplying two 2x2 matrices",
+			fields: fields{
+				data: []float64{1, 2, 3, 4},
+				rows: 2,
+				cols: 2,
+			},
+			args: args{
+				other: &FlatMatrix{
+					data: []float64{5, 6, 7, 8},
+					rows: 2,
+					cols: 2,
+				},
+			},
+			want: &FlatMatrix{
+				data: []float64{19, 22, 43, 50},
+				rows: 2,
+				cols: 2,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test multiplying two 3x3 matrices",
+			fields: fields{
+				data: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+				rows: 3,
+				cols: 3,
+			},
+			args: args{
+				other: &FlatMatrix{
+					data: []float64{9, 8, 7, 6, 5, 4, 3, 2, 1},
+					rows: 3,
+					cols: 3,
+				},
+			},
+			want: &FlatMatrix{
+				data: []float64{30, 24, 18, 84, 69, 54, 138, 114, 90},
+				rows: 3,
+				cols: 3,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test multiplying matrices with incompatible dimensions should return error",
+			fields: fields{
+				data: []float64{1, 2, 3, 4},
+				rows: 2,
+				cols: 2,
+			},
+			args: args{
+				other: &FlatMatrix{
+					data: []float64{1, 2, 3},
+					rows: 1,
+					cols: 3,
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Test multiplying with nil matrix should return error",
+			fields: fields{
+				data: []float64{1, 2, 3, 4},
+				rows: 2,
+				cols: 2,
+			},
+			args: args{
+				other: nil,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Test multiplying empty matrices",
+			fields: fields{
+				data: []float64{},
+				rows: 0,
+				cols: 0,
+			},
+			args: args{
+				other: &FlatMatrix{
+					data: []float64{},
+					rows: 0,
+					cols: 0,
+				},
+			},
+			want: &FlatMatrix{
+				data: []float64{},
+				rows: 0,
+				cols: 0,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &FlatMatrix{
+				data: tt.fields.data,
+				rows: tt.fields.rows,
+				cols: tt.fields.cols,
+			}
+			got, err := m.Mul(tt.args.other)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FlatMatrix.Mul() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FlatMatrix.Mul() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestFlatMatrix_CompareDimensions(t *testing.T) {
 	type fields struct {
 		data []float64
