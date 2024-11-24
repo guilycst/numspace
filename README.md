@@ -1,6 +1,6 @@
 # NumSpace
 ![Coverage](https://img.shields.io/badge/Coverage-94.4%25-brightgreen)
-
+[![CodeQL Advanced](https://github.com/guilycst/numspace/actions/workflows/codeql.yml/badge.svg)](https://github.com/guilycst/numspace/actions/workflows/codeql.yml)
 **A journey through applied mathematics with a machine learning bias.**
 
 NumSpace is a **work-in-progress** repository aimed at implementing mathematical concepts — with a strong focus on **linear algebra** — as they are studied and explored. This project is designed to highlight the practical applicability of mathematical principles, especially in areas like **Machine Learning** and **computational applications**.
