@@ -77,7 +77,7 @@ func (m *FlatMatrix) Cols() int {
 }
 
 func (m *FlatMatrix) At(i, j int) (float64, error) {
-	if m.rows-i <= 0 || m.cols-j <= 0 {
+	if i < 0 || i >= m.rows || j < 0 || j >= m.cols {
 		return 0, ErrorIndexOutOfBounds
 	}
 	return m.data[i*m.cols+j], nil
@@ -96,10 +96,10 @@ func (m *FlatMatrix) Add(other Matrix) (Matrix, error) {
 		return nil, ErrInvalidDimensions
 	}
 
-	result := make([]float64, 0, m.rows*m.cols)
+	result := make([]float64, m.rows*m.cols)
 	for i := 0; i < m.rows; i++ {
 		for j := 0; j < m.cols; j++ {
-			result = append(result, m.MustAt(i, j)+other.MustAt(i, j))
+			result[i*m.cols+j] = m.MustAt(i, j) + other.MustAt(i, j)
 		}
 	}
 
@@ -115,10 +115,10 @@ func (m *FlatMatrix) Sub(other Matrix) (Matrix, error) {
 		return nil, ErrInvalidDimensions
 	}
 
-	result := make([]float64, 0, m.rows*m.cols)
+	result := make([]float64, m.rows*m.cols)
 	for i := 0; i < m.rows; i++ {
 		for j := 0; j < m.cols; j++ {
-			result = append(result, m.MustAt(i, j)-other.MustAt(i, j))
+			result[i*m.cols+j] = m.MustAt(i, j) - other.MustAt(i, j)
 		}
 	}
 
@@ -127,14 +127,12 @@ func (m *FlatMatrix) Sub(other Matrix) (Matrix, error) {
 
 func (m *FlatMatrix) ScalarMul(scalar float64) (Matrix, error) {
 	if m.Empty() {
-		return NewMatrixFlat([]float64{}, 0, 0)
+		return NewMatrixZero(0, 0)
 	}
 
-	result := make([]float64, 0, m.rows*m.cols)
-	for i := 0; i < m.rows; i++ {
-		for j := 0; j < m.cols; j++ {
-			result = append(result, m.MustAt(i, j)*scalar)
-		}
+	result := make([]float64, m.rows*m.cols)
+	for i := 0; i < len(m.data); i++ {
+		result[i] = m.data[i] * scalar
 	}
 	return NewMatrixFlat(result, m.rows, m.cols)
 }
@@ -148,10 +146,12 @@ func (m *FlatMatrix) Mul(other Matrix) (Matrix, error) {
 		return nil, ErrMulDimensions
 	}
 
-	result, err := NewMatrixZero(m.Rows(), other.Cols())
+	nm, err := NewMatrixZero(m.Rows(), other.Cols())
 	if err != nil {
 		panic(err)
 	}
+
+	result := nm.(*FlatMatrix)
 
 	for i := 0; i < m.Rows(); i++ {
 		for j := 0; j < other.Cols(); j++ {
@@ -182,22 +182,23 @@ func (m *FlatMatrix) MustAt(i, j int) (v float64) {
 	return
 }
 
-func NewMatrix(data [][]float64) (*FlatMatrix, error) {
-	if !retangular(data) {
+func NewMatrix(data [][]float64) (Matrix, error) {
+	if !isRectangular(data) {
 		return nil, ErrNotRectangular
 	}
 
 	if len(data) == 0 {
-		return NewMatrixFlat([]float64{}, 0, 0)
+		return NewMatrixZero(0, 0)
 	}
 
 	return NewMatrixFlat(flatten(data), len(data), len(data[0]))
 }
 
-func NewMatrixFlat(data []float64, rows, cols int) (*FlatMatrix, error) {
-	if len(data) != rows*cols {
-		return nil, ErrNotRectangular
+func NewMatrixFlat(data []float64, rows, cols int) (Matrix, error) {
+	if err := validateConstructor(len(data), rows, cols); err != nil {
+		return nil, err
 	}
+
 	return &FlatMatrix{
 		data: data,
 		rows: rows,
@@ -205,7 +206,10 @@ func NewMatrixFlat(data []float64, rows, cols int) (*FlatMatrix, error) {
 	}, nil
 }
 
-func NewMatrixZero(rows, cols int) (*FlatMatrix, error) {
+func NewMatrixZero(rows, cols int) (Matrix, error) {
+	if err := validateConstructor(rows*cols, rows, cols); err != nil {
+		return nil, err
+	}
 	return &FlatMatrix{
 		data: make([]float64, rows*cols),
 		rows: rows,
@@ -213,7 +217,17 @@ func NewMatrixZero(rows, cols int) (*FlatMatrix, error) {
 	}, nil
 }
 
-func retangular(data [][]float64) bool {
+func validateConstructor(dataLen int, rows, cols int) error {
+	if dataLen > 0 && dataLen != (rows*cols) {
+		return ErrInvalidDimensions
+	}
+	if rows < 0 || cols < 0 {
+		return ErrInvalidDimensions
+	}
+	return nil
+}
+
+func isRectangular(data [][]float64) bool {
 	rows := len(data)
 	if rows == 0 {
 		return true
