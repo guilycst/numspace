@@ -1,5 +1,5 @@
 # NumSpace
-![Coverage](https://img.shields.io/badge/Coverage-94.4%25-brightgreen) 
+![Coverage](https://img.shields.io/badge/Coverage-94.4%25-brightgreen)
 [![CodeQL Advanced](https://github.com/guilycst/numspace/actions/workflows/codeql.yml/badge.svg)](https://github.com/guilycst/numspace/actions/workflows/codeql.yml)
 
 **A journey through applied mathematics with a machine learning bias.**
