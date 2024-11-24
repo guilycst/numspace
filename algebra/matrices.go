@@ -17,6 +17,7 @@ type Matrix interface {
 	Empty() bool
 	Add(Matrix) (Matrix, error)
 	Sub(Matrix) (Matrix, error)
+	ScalarMul(float64) (Matrix, error)
 	CompareDimensions(Matrix) bool
 }
 
@@ -80,6 +81,20 @@ func (m *FlatMatrix) Sub(other Matrix) (Matrix, error) {
 		}
 	}
 
+	return NewMatrixFlat(result, m.rows, m.cols)
+}
+
+func (m *FlatMatrix) ScalarMul(scalar float64) (Matrix, error) {
+	if m.Empty() {
+		return NewMatrixFlat([]float64{}, 0, 0)
+	}
+
+	result := make([]float64, 0, m.rows*m.cols)
+	for i := 0; i < m.rows; i++ {
+		for j := 0; j < m.cols; j++ {
+			result = append(result, m.MustAt(i, j)*scalar)
+		}
+	}
 	return NewMatrixFlat(result, m.rows, m.cols)
 }
 
