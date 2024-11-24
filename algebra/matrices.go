@@ -55,9 +55,16 @@ type Matrix interface {
 	CompareDimensions(Matrix) bool
 }
 
+// FlatMatrix is a concrete implementation of the Matrix interface.
+// It stores matrix data as a flat slice for efficient memory access and computation.
 type FlatMatrix struct {
+	// data is the flat slice that stores all matrix elements in row-major order.
 	data []float64
+
+	// rows is the number of rows in the matrix.
 	rows int
+
+	// cols is the number of columns in the matrix.
 	cols int
 }
 
