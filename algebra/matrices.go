@@ -16,6 +16,7 @@ type Matrix interface {
 	MustAt(i, j int) float64
 	Empty() bool
 	Add(Matrix) (Matrix, error)
+	Sub(Matrix) (Matrix, error)
 	CompareDimensions(Matrix) bool
 }
 
@@ -57,6 +58,25 @@ func (m *FlatMatrix) Add(other Matrix) (Matrix, error) {
 	for i := 0; i < m.rows; i++ {
 		for j := 0; j < m.cols; j++ {
 			result = append(result, m.MustAt(i, j)+other.MustAt(i, j))
+		}
+	}
+
+	return NewMatrixFlat(result, m.rows, m.cols)
+}
+
+func (m *FlatMatrix) Sub(other Matrix) (Matrix, error) {
+	if other == nil {
+		return nil, ErrNilMatrix
+	}
+
+	if !m.CompareDimensions(other) {
+		return nil, ErrInvalidDimensions
+	}
+
+	result := make([]float64, 0, m.rows*m.cols)
+	for i := 0; i < m.rows; i++ {
+		for j := 0; j < m.cols; j++ {
+			result = append(result, m.MustAt(i, j)-other.MustAt(i, j))
 		}
 	}
 

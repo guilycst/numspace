@@ -274,6 +274,114 @@ func TestFlatMatrix_Add(t *testing.T) {
 	}
 }
 
+func TestFlatMatrix_Sub(t *testing.T) {
+	type fields struct {
+		data []float64
+		rows int
+		cols int
+	}
+	type args struct {
+		other Matrix
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    Matrix
+		wantErr bool
+	}{
+		{
+			name: "Test subtracting two 2x2 matrices",
+			fields: fields{
+				data: []float64{5, 6, 7, 8},
+				rows: 2,
+				cols: 2,
+			},
+			args: args{
+				other: &FlatMatrix{
+					data: []float64{1, 2, 3, 4},
+					rows: 2,
+					cols: 2,
+				},
+			},
+			want: &FlatMatrix{
+				data: []float64{4, 4, 4, 4},
+				rows: 2,
+				cols: 2,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test subtracting two 3x3 matrices",
+			fields: fields{
+				data: []float64{9, 8, 7, 6, 5, 4, 3, 2, 1},
+				rows: 3,
+				cols: 3,
+			},
+			args: args{
+				other: &FlatMatrix{
+					data: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+					rows: 3,
+					cols: 3,
+				},
+			},
+			want: &FlatMatrix{
+				data: []float64{8, 6, 4, 2, 0, -2, -4, -6, -8},
+				rows: 3,
+				cols: 3,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test subtracting matrices with different dimensions should return error",
+			fields: fields{
+				data: []float64{1, 2, 3, 4},
+				rows: 2,
+				cols: 2,
+			},
+			args: args{
+				other: &FlatMatrix{
+					data: []float64{1, 2, 3},
+					rows: 1,
+					cols: 3,
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Test subtracting nil matrix should return error",
+			fields: fields{
+				data: []float64{1, 2, 3, 4},
+				rows: 2,
+				cols: 2,
+			},
+			args: args{
+				other: nil,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &FlatMatrix{
+				data: tt.fields.data,
+				rows: tt.fields.rows,
+				cols: tt.fields.cols,
+			}
+			got, err := m.Sub(tt.args.other)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FlatMatrix.Sub() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FlatMatrix.Sub() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestFlatMatrix_CompareDimensions(t *testing.T) {
 	type fields struct {
 		data []float64
