@@ -4,21 +4,54 @@ import (
 	"errors"
 )
 
-var ErrNotRectangular = errors.New("matrix is not rectangular")
-var ErrNilMatrix = errors.New("matrix is nil")
-var ErrInvalidDimensions = errors.New("invalid dimensions")
-var ErrorIndexOutOfBounds = errors.New("index out of range")
-var ErrMulDimensions = errors.New("invalid dimensions for multiplication")
+var (
+	// ErrNotRectangular indicates that the input data is not a rectangular matrix.
+	ErrNotRectangular = errors.New("matrix is not rectangular")
 
+	// ErrNilMatrix is returned when a nil matrix is provided to an operation.
+	ErrNilMatrix = errors.New("matrix is nil")
+
+	// ErrInvalidDimensions indicates a mismatch in matrix dimensions during an operation.
+	ErrInvalidDimensions = errors.New("invalid dimensions")
+
+	// ErrorIndexOutOfBounds is returned when an invalid row or column index is accessed.
+	ErrorIndexOutOfBounds = errors.New("index out of range")
+
+	// ErrMulDimensions indicates that matrix dimensions are incompatible for multiplication.
+	ErrMulDimensions = errors.New("invalid dimensions for multiplication")
+)
+
+// Matrix defines a general interface for matrix operations.
+// Implementations must ensure correct handling of dimensions and error reporting.
 type Matrix interface {
+	// Rows returns the number of rows in the matrix.
 	Rows() int
+
+	// Cols returns the number of columns in the matrix.
 	Cols() int
+
+	// At retrieves the element at row i and column j.
+	// Returns an error if the indices are out of bounds.
 	At(i, j int) (float64, error)
+
+	// MustAt retrieves the element at row i and column j, panicking if indices are out of bounds.
 	MustAt(i, j int) float64
+
+	// Empty checks whether the matrix has zero rows or columns.
 	Empty() bool
+
+	// Add performs element-wise addition with another matrix.
+	// Returns an error if dimensions do not match.
 	Add(Matrix) (Matrix, error)
+
+	// Sub performs element-wise subtraction with another matrix.
+	// Returns an error if dimensions do not match.
 	Sub(Matrix) (Matrix, error)
+
+	// ScalarMul multiplies each element of the matrix by the given scalar.
 	ScalarMul(float64) (Matrix, error)
+
+	// CompareDimensions checks if the dimensions of the current matrix match another matrix.
 	CompareDimensions(Matrix) bool
 }
 
